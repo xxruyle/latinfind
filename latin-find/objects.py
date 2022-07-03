@@ -1,4 +1,3 @@
-from numpy import format_parser
 import requests
 from bs4 import BeautifulSoup 
 import re 
