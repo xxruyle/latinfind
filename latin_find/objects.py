@@ -3,34 +3,43 @@ from bs4 import BeautifulSoup
 import re 
 
 class latinFind():
+    '''Class API for online latin dictionary'''
     def __init__(self):
-        self.parolaLink = "https://www.online-latin-dictionary.com/latin-english-dictionary.php?parola="
-        self.lemmaLink = "https://www.online-latin-dictionary.com/latin-english-dictionary.php?lemma="
+       pass 
 
-        
 
-    def getSoup(self, latinword): 
-        response = requests.get(f"{self.parolaLink}{latinword}").text 
+    def getSoup(self, link, latinword): 
+        '''Gets the soup of the page with the a specific latin word translated to english'''
+        response = requests.get(f"{link}{latinword}").text 
         soup = BeautifulSoup(response, 'html.parser')
         return soup 
 
-    # The default translation reqest 
-    def reqDefault(self, word): 
+    def reqDefault(self, link, word):
+        '''The default translation page with parola keyword at the end of URL''' 
         translationList = []
-        disambigua = []
-        soup = self.getSoup(word)
+        soup = self.getSoup(link, word)
+
+        # finding possible alternative translations to the word 
         disambiguation = soup.find("ul", attrs={"class": "disambigua"})
-        
         if disambiguation: 
-            translationList.append(disambiguation.text)
-            tags = disambiguation.find_all("a")
-            print(tags)
-            #href = tags["href"]
-            #m = re.search(r'\b=(\w+)', href)
-            #tref = m.group(1)
-
+            taglist = []
+                    
+            disambigtext = disambiguation.text 
+            disambigList = disambigtext.split("\n")
             
+            disambigList.pop(0)
+            disambigList.pop()
 
+            tags = disambiguation.find_all("a")
+        
+            for tag in tags: 
+                href = tag["href"]
+                s = re.split(r'=', href)
+                taglist.append(s[-1]) 
+
+            self.formatDisambigua(disambigList, taglist)
+            
+        # listing out all the translations of the word     
         translation = soup.find("div", attrs={"id": "myth"})
         if translation:
             transList = translation.find_all("span", attrs={"class": "english"})
@@ -42,15 +51,22 @@ class latinFind():
 
             self.formatPrint(translationList)
 
-        return disambigua, translationList 
-
     def reqLemma(self): 
         pass 
 
     def formatPrint(self, listObj):
+        '''Prints out the translation list in prettier format'''
         print(f"Grammar: {listObj[0]}")
         for j, line in enumerate(range(1, len(listObj))): 
             print(f"{line}: {listObj[line]}")
+
+    def formatDisambigua(self, listObj, taglist):
+        '''Prints out the disambigua in prettier format'''
+        for i, dis in enumerate(listObj):
+            if "IN THIS PAGE" in dis: 
+                print(f"{dis}")
+            else: 
+                print(f"{dis} ({taglist[i]})")
 
 
             
