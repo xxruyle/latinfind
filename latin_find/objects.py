@@ -69,12 +69,25 @@ class latinFind():
                 translationList.append(trans.text) 
 
             self.formatPrint(translationList)
+
         # If there are only results instead of a direct translation (using omnipotenti as an example)
         else: 
+            
+
             td = soup.find("td", attrs={"id": "middle"})
             table = td.find("table", attrs={"width": "100%"})
-            tr = table.find_all("tr") 
-            print(tr)
+            td = table.find_all("td")
+
+            print(f"The search for ({word}) returned the following results:")
+            for i in td: 
+                b = i.find("b")
+                iblock = i.find("i")
+                a = i.find("a")
+                tdHref = a["href"]
+                t = re.split(r'=', tdHref)
+                hreftext = t[-1]
+                if b and iblock:
+                    print(b.text, f"({iblock.text})", f"[WORD TAG:{hreftext}]")
             
 
 
